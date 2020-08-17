@@ -51,6 +51,9 @@ spec:
       labels:
         app: my-csi-app
     spec:
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 3000
       containers:
         - name: my-frontend
           image: busybox

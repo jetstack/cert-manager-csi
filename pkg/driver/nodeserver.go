@@ -156,6 +156,11 @@ func (ns *NodeServer) NodePublishVolume(ctx context.Context, req *csi.NodePublis
 			fmt.Sprintf("failed to mount path %s -> %s: %s", mountPath, targetPath, err))
 	}
 
+	// We need to ensure unix permissions if the file already exists
+	if err := os.Chmod(targetPath, 700); err != nil {
+		return nil, err
+	}
+
 	glog.V(2).Infof("node: mount successful %s:%s:%s",
 		attr[csiapi.CSIPodNamespaceKey], attr[csiapi.CSIPodNameKey], vol.ID)
 

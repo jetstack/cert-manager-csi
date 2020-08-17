@@ -27,6 +27,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	utilpointer "k8s.io/utils/pointer"
 
 	csi "github.com/jetstack/cert-manager-csi/pkg/apis"
 	"github.com/jetstack/cert-manager-csi/pkg/util"
@@ -211,6 +212,11 @@ func newRenewingTestPod(f *framework.Framework, extraAttributes map[string]strin
 			Namespace:    f.Namespace.Name,
 		},
 		Spec: corev1.PodSpec{
+			SecurityContext: &corev1.PodSecurityContext{
+				RunAsUser:  utilpointer.Int64Ptr(1000),
+				RunAsGroup: utilpointer.Int64Ptr(3000),
+				FSGroup:    utilpointer.Int64Ptr(1000),
+			},
 			Containers: []corev1.Container{
 				corev1.Container{
 					Name:    "test-container-1",

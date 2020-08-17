@@ -88,6 +88,7 @@ func New(rootPath, nodeImage string, masterNodes, workerNodes int) (*Kind, error
 
 	// generate rest config to kind cluster
 	kubeconfig := k.ctx.KubeConfigPath()
+	log.Infof("kubeconfig path: %s", kubeconfig)
 	restConfig, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		return nil, k.errDestroy(fmt.Errorf("failed to build kind rest client: %s", err))

@@ -38,14 +38,14 @@ func (k *Kind) DeployCSIDriver(version string) error {
 
 	_, err := k.runCmd("go", "build", "-v", "-o", csiPath, cmdPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to build CSI driver: %s", err)
 	}
 
 	image := fmt.Sprintf(e2eImage, version)
 	log.Infof("kind: building CSI driver image %q", image)
 	_, err = k.runCmd("docker", "build", "-t", image, k.rootPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to build CSI docker image: %s", err)
 	}
 
 	tmpDir, err := ioutil.TempDir(os.TempDir(), "cert-manager-csi-e2e")
@@ -55,7 +55,7 @@ func (k *Kind) DeployCSIDriver(version string) error {
 	defer os.RemoveAll(tmpDir)
 
 	if err := k.loadImage(tmpDir, image); err != nil {
-		return err
+		return fmt.Errorf("failed to load CSI image: %s", err)
 	}
 
 	manifests, err := ioutil.ReadFile(

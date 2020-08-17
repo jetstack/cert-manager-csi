@@ -139,7 +139,7 @@ func (k *Kind) DeployCertManager(version string) error {
 func (k *Kind) ensureKubectl() error {
 	binPath := filepath.Join(k.rootPath, "bin")
 	kubectlPath := filepath.Join(binPath, "kubectl")
-	log.Debugf("kind: ensuring kubectl is present at %q", kubectlPath)
+	log.Infof("kind: ensuring kubectl is present at %q", kubectlPath)
 
 	err := os.MkdirAll(binPath, 0744)
 	if err != nil {
@@ -205,7 +205,7 @@ func (k *Kind) kubectlApplyF(manifestPath string, ins ...[]byte) error {
 	log.Infof("kind: applying manifests %s", manifestPath)
 
 	if err := k.ensureKubectl(); err != nil {
-		return err
+		return fmt.Errorf("failed to ensure kubectl binary: %s", err)
 	}
 
 	kubectlPath := filepath.Join(k.rootPath, "bin", "kubectl")
@@ -230,8 +230,12 @@ func (k *Kind) kubectlApplyF(manifestPath string, ins ...[]byte) error {
 		}()
 	}
 
-	if err := cmd.Run(); err != nil {
+	if err := cmd.Start(); err != nil {
 		return err
+	}
+
+	if err := cmd.Wait(); err != nil {
+		return fmt.Errorf("failed to run apply on %q: %s", manifestPath, err)
 	}
 
 	return nil

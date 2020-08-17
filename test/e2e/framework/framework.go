@@ -29,6 +29,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/kubectl/pkg/scheme"
+	utilpointer "k8s.io/utils/pointer"
 
 	csi "github.com/jetstack/cert-manager-csi/pkg/apis"
 	"github.com/jetstack/cert-manager-csi/test/e2e/framework/config"
@@ -187,6 +188,11 @@ func (f *Framework) RandomPod() *corev1.Pod {
 			Namespace:    f.Namespace.Name,
 		},
 		Spec: corev1.PodSpec{
+			SecurityContext: &corev1.PodSecurityContext{
+				RunAsUser:  utilpointer.Int64Ptr(1000),
+				RunAsGroup: utilpointer.Int64Ptr(3000),
+				FSGroup:    utilpointer.Int64Ptr(1000),
+			},
 			Containers: containers,
 			Volumes:    volumes,
 		},

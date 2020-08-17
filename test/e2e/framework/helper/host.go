@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"strconv"
 	"strings"
 
 	cmapi "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha2"
@@ -57,12 +56,12 @@ func (h *Helper) MetaDataCertificateKeyExistInHostPath(cr *cmapi.CertificateRequ
 		return err
 	}
 
-	if err := h.matchFilePerm(node, dirPath, 700); err != nil {
+	if err := h.matchFilePerm(node, dirPath, "755"); err != nil {
 		return err
 	}
 
 	metaPath := filepath.Join(dirPath, "metadata.json")
-	if err := h.matchFilePerm(node, metaPath, 600); err != nil {
+	if err := h.matchFilePerm(node, metaPath, "600"); err != nil {
 		return err
 	}
 
@@ -91,19 +90,25 @@ func (h *Helper) MetaDataCertificateKeyExistInHostPath(cr *cmapi.CertificateRequ
 	}
 
 	dataDirPath := filepath.Join(dirPath, "data")
-	if err := h.matchFilePerm(node, dataDirPath, 744); err != nil {
+	if err := h.matchFilePerm(node, dataDirPath, "755"); err != nil {
 		return err
 	}
 
 	certPath := attr[csiapi.CertFileKey]
 	certPath = filepath.Join(dataDirPath, certPath)
-	if err := h.matchFilePerm(node, certPath, 600); err != nil {
+	if err := h.matchFilePerm(node, certPath, "644"); err != nil {
 		return err
 	}
 
 	keyPath := attr[csiapi.KeyFileKey]
 	keyPath = filepath.Join(dataDirPath, keyPath)
-	if err := h.matchFilePerm(node, keyPath, 600); err != nil {
+	if err := h.matchFilePerm(node, keyPath, "644"); err != nil {
+		return err
+	}
+
+	caPath := attr[csiapi.CAFileKey]
+	caPath = filepath.Join(dataDirPath, caPath)
+	if err := h.matchFilePerm(node, caPath, "644"); err != nil {
 		return err
 	}
 
@@ -134,10 +139,17 @@ func (h *Helper) readFile(node *nodes.Node, path string) ([]byte, error) {
 	return execOut.Bytes(), nil
 }
 
-func (h *Helper) matchFilePerm(node *nodes.Node, path string, perm int) error {
+func (h *Helper) matchFilePerm(node *nodes.Node, path string, perm string) error {
 	execOut, execErr := new(bytes.Buffer), new(bytes.Buffer)
+	foo := new(bytes.Buffer)
 
-	cmd := node.Command("stat", "-c", "\"%a\"", path)
+	fooCmd := node.Command("ls", "-la", path)
+	fooCmd.SetStdout(foo)
+	if err := fooCmd.Run(); err != nil {
+		return fmt.Errorf("failed to run ls: %s", err)
+	}
+
+	cmd := node.Command("stat", "-c", "%a", path)
 	cmd.SetStdout(execOut)
 	cmd.SetStderr(execErr)
 
@@ -156,16 +168,9 @@ func (h *Helper) matchFilePerm(node *nodes.Node, path string, perm int) error {
 			path, err)
 	}
 
-	uStr := strings.ReplaceAll(
-		strings.TrimSpace(execOut.String()), `"`, "")
-	u, err := strconv.ParseUint(uStr, 10, 32)
-	if err != nil {
-		return err
-	}
-
-	if uint32(u) != uint32(perm) {
-		return fmt.Errorf("expected %q to have permissions %v but got %v",
-			path, uint32(perm), uint32(u))
+	if strings.TrimSpace(execOut.String()) != perm {
+		return fmt.Errorf("expected %q to have permissions %s but got %s\n%s\n",
+			path, perm, execOut.String(), foo.String())
 	}
 
 	return nil

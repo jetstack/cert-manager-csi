@@ -29,7 +29,7 @@ import (
 
 const (
 	defaultNodeImage          = "1.16.1"
-	defaultCertManagerVersion = "0.12.0"
+	defaultCertManagerVersion = "0.16.1"
 	defaultRootPath           = "../../../."
 )
 

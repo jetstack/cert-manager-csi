@@ -443,7 +443,7 @@ func certsToWatchMatch(t *testing.T, exp, got []certToWatch) {
 
 func maybeWriteVolData(t *testing.T, path string, data []byte) {
 	if len(data) > 0 {
-		if err := ioutil.WriteFile(path, data, 0600); err != nil {
+		if err := ioutil.WriteFile(path, data, 0644); err != nil {
 			t.Error(err)
 			t.FailNow()
 		}

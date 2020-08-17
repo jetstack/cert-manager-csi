@@ -77,11 +77,8 @@ spec:
         - name: cert-manager-csi
           securityContext:
             privileged: true
-            capabilities:
-              add: ["SYS_ADMIN"]
-            allowPrivilegeEscalation: true
           image: gcr.io/jetstack-josh/cert-manager-csi:v0.1.0-alpha.1
-          imagePullPolicy: "IfNotPresent"
+          imagePullPolicy: "Never"
           args :
             - --node-id=$(NODE_ID)
             - --endpoint=$(CSI_ENDPOINT)

@@ -19,7 +19,6 @@ package certmanager
 import (
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
@@ -84,29 +83,22 @@ func (c *CertManager) EnsureCertificate(vol *csiapi.MetaData, keyBundle *util.Ke
 		return nil, err
 	}
 
-	// Write metadata to file
-	metaDataBytes, err := json.Marshal(vol)
-	if err != nil {
+	if err := util.WriteMetaDataFile(vol); err != nil {
 		return nil, err
 	}
 
-	metaPath := filepath.Join(vol.Path, csiapi.MetaDataFileName)
-	if err := ioutil.WriteFile(metaPath, metaDataBytes, 0600); err != nil {
-		return nil, err
-	}
-
-	glog.V(4).Infof("cert-manager: metadata written to file %s", metaPath)
+	glog.V(4).Infof("cert-manager: metadata written to file %s", filepath.Join(vol.Path, csiapi.MetaDataFileName))
 
 	certPath := util.CertPath(vol)
 
-	if err := util.WriteFile(certPath, cr.Status.Certificate, 0600); err != nil {
+	if err := util.WriteFile(certPath, cr.Status.Certificate, 0644); err != nil {
 		return nil, err
 	}
 
 	if len(cr.Status.CA) > 0 {
 		caPath := util.CAPath(vol)
 
-		if err := util.WriteFile(caPath, cr.Status.CA, 0600); err != nil {
+		if err := util.WriteFile(caPath, cr.Status.CA, 0644); err != nil {
 			return nil, err
 		}
 
@@ -121,7 +113,7 @@ func (c *CertManager) EnsureCertificate(vol *csiapi.MetaData, keyBundle *util.Ke
 	glog.Infof("cert-manager: certificate written to file %s", certPath)
 
 	keyPath := util.KeyPath(vol)
-	if err := util.WriteFile(keyPath, keyBundle.PEM, 0600); err != nil {
+	if err := util.WriteFile(keyPath, keyBundle.PEM, 0644); err != nil {
 		return nil, fmt.Errorf("faild to write key data to file: %s", err)
 	}
 
