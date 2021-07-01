@@ -17,10 +17,7 @@ limitations under the License.
 package util
 
 import (
-	"crypto/sha256"
-	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -28,26 +25,6 @@ import (
 	cmapi "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1"
 	"github.com/jetstack/cert-manager/pkg/util/pki"
 )
-
-func BuildVolumeName(podName, volID string) string {
-	return fmt.Sprintf("cert-manager-csi-%s-%s",
-		podName, volID)
-}
-
-func BuildVolumeID(podUID, volSourceSpecName string) string {
-	result := sha256.Sum256([]byte(fmt.Sprintf("%s%s", podUID, volSourceSpecName)))
-	return fmt.Sprintf("csi-%x", result)
-}
-
-func WriteMetaDataFile(vol *csiapi.MetaData) error {
-	b, err := json.Marshal(vol)
-	if err != nil {
-		return err
-	}
-
-	metaPath := filepath.Join(vol.Path, csiapi.MetaDataFileName)
-	return WriteFile(metaPath, b, 0600)
-}
 
 func CertificateRequestMatchesSpec(cr *cmapi.CertificateRequest, attr map[string]string) error {
 	var errs []string
@@ -154,8 +131,4 @@ func CertificateRequestMatchesSpec(cr *cmapi.CertificateRequest, attr map[string
 	}
 
 	return nil
-}
-
-func BoolPointer(b bool) *bool {
-	return &b
 }

@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Jetstack cert-manager contributors.
+Copyright 2021 The Jetstack cert-manager contributors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,32 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package util
+package cases
 
-func StringsMatch(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-
-	return true
-}
-
-func UniqueStringSlice(slice []string) []string {
-	sMap := make(map[string]bool)
-	var dd []string
-
-	for _, k := range slice {
-		if _, v := sMap[k]; !v {
-			sMap[k] = true
-			dd = append(dd, k)
-		}
-	}
-
-	return dd
+func boolPtr(b bool) *bool {
+	return &b
 }

@@ -155,6 +155,7 @@ func (f *Framework) RandomPod() *corev1.Pod {
 			VolumeSource: corev1.VolumeSource{
 				CSI: &corev1.CSIVolumeSource{
 					Driver:           csi.GroupName,
+					ReadOnly:         boolPtr(true),
 					VolumeAttributes: f.testdata.RandomVolumeAttributes(),
 				},
 			},

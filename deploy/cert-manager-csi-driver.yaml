@@ -20,7 +20,7 @@ metadata:
 rules:
 - apiGroups: ["cert-manager.io"]
   resources: ["certificaterequests"]
-  verbs: ["get", "create", "delete", "update"]
+  verbs: ["watch", "create", "delete", "list"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -85,7 +85,7 @@ spec:
           args :
             - --node-id=$(NODE_ID)
             - --endpoint=$(CSI_ENDPOINT)
-            - --data-root=/csi-data-dir
+            - --data-root=csi-data-dir
           env:
             - name: NODE_ID
               valueFrom:

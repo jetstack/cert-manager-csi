@@ -30,8 +30,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	csi "github.com/jetstack/cert-manager-csi/pkg/apis"
-	"github.com/jetstack/cert-manager-csi/pkg/util"
 	"github.com/jetstack/cert-manager-csi/test/e2e/framework"
+	"github.com/jetstack/cert-manager-csi/test/e2e/util"
 )
 
 var _ = framework.CasesDescribe("Normal certificate renew behaviour", func() {
@@ -201,6 +201,7 @@ func newRenewingTestPod(f *framework.Framework, extraAttributes map[string]strin
 		VolumeSource: corev1.VolumeSource{
 			CSI: &corev1.CSIVolumeSource{
 				Driver:           csi.GroupName,
+				ReadOnly:         boolPtr(true),
 				VolumeAttributes: attributes,
 			},
 		},
@@ -243,8 +244,7 @@ func newRenewingTestPod(f *framework.Framework, extraAttributes map[string]strin
 	Expect(err).NotTo(HaveOccurred())
 
 	By("Ensure the corresponding CertificateRequest should exist with the correct spec")
-	crName := util.BuildVolumeID(string(testPod.GetUID()), "tls")
-	cr, err := f.Helper().WaitForCertificateRequestReady(f.Namespace.Name, crName, time.Second)
+	cr, err := f.Helper().WaitForCertificateRequestReady(testPod, time.Second)
 	Expect(err).NotTo(HaveOccurred())
 
 	err = util.CertificateRequestMatchesSpec(cr, testVolume.CSI.VolumeAttributes)

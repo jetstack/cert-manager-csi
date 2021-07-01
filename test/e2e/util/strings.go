@@ -14,33 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package util
 
-import (
-	"fmt"
-	"time"
+func StringsMatch(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
 
-	. "github.com/onsi/ginkgo"
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
 
-	. "github.com/jetstack/cert-manager-csi/test/e2e/framework/log"
-)
-
-func nowStamp() string {
-	return time.Now().Format(time.StampMilli)
-}
-
-func Failf(format string, args ...interface{}) {
-	msg := fmt.Sprintf(format, args...)
-	Logf(msg)
-	Fail(nowStamp()+": "+msg, 1)
-}
-
-func Skipf(format string, args ...interface{}) {
-	msg := fmt.Sprintf(format, args...)
-	Logf("INFO", msg)
-	Skip(nowStamp() + ": " + msg)
-}
-
-func boolPtr(b bool) *bool {
-	return &b
+	return true
 }

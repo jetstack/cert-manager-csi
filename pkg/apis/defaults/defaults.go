@@ -26,7 +26,14 @@ import (
 	csiapi "github.com/jetstack/cert-manager-csi/pkg/apis/v1alpha1"
 )
 
-func SetDefaultAttributes(attr map[string]string) (map[string]string, error) {
+// SetDefaultAttributes will set default values on the given attribute map.
+// It will not modify the attributes in-place, and instead will return a copy.
+func SetDefaultAttributes(attrOriginal map[string]string) (map[string]string, error) {
+	attr := make(map[string]string)
+	for k, v := range attrOriginal {
+		attr[k] = v
+	}
+
 	setDefaultIfEmpty(attr, csiapi.IssuerKindKey, cmapi.IssuerKind)
 	setDefaultIfEmpty(attr, csiapi.IssuerGroupKey, certmanager.GroupName)
 
